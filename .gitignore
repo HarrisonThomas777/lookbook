@@ -1,3 +1,4 @@
 tools/items.jsonl
 tools/plain-data/
 site/data/
+__pycache__/
