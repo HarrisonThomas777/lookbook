@@ -1,0 +1,62 @@
+import re, unicodedata
+# (pattern, brand). Patterns are regex on the NFKC-lowercased title. Order = priority.
+RULES=[
+ (r'louis\s*vuitto|\blv\b|路易威登','Louis Vuitton'),
+ (r'chane|香奈儿','Chanel'),
+ (r'herm[eè]s|\bh\b|kelly|constance|twilly|quizz|rivale|\bh\s*\d{4}\b|凯莉','Hermès'),
+ (r'miu\s*m|\bmiu\b|\bvmu\b|\bsmu\b','Miu Miu'),
+ (r'loro|洛罗','Loro Piana'),
+ (r'ggdb|golden\s*goose','Golden Goose'),
+ (r'the\s*ro\b|the\s*row','The Row'),
+ (r'\bysl\b|saint\s*laurent|圣罗兰','Saint Laurent'),
+ (r'\bcl\b|louboutin','Christian Louboutin'),
+ (r'\bbc\b|brunello|cucinelli','Brunello Cucinelli'),
+ (r'\balo\b|\ballo\b|\bale\b','Alo Yoga'),
+ (r'alai','Alaïa'),
+ (r'jacques','Jacquemus'),
+ (r'mqueen|mcqueen','Alexander McQueen'),
+ (r'alexander\s*w','Alexander Wang'),
+ (r'cartier','Cartier'),
+ (r'qeelin','Qeelin'),
+ (r'chrome','Chrome Hearts'),
+ (r'loewe|lowe\b|罗意威','Loewe'),
+ (r'long\s*champ','Longchamp'),
+ (r'aquaz','Aquazzura'),
+ (r'zimmerman','Zimmermann'),
+ (r'jimmy\s*choo','Jimmy Choo'),
+ (r'val[ne]+tino','Valentino'),
+ (r'gucc','Gucci'),
+ (r'pucci','Pucci'),
+ (r'delvaux','Delvaux'),
+ (r'goyard|戈雅','Goyard'),
+ (r'chloe|chloé','Chloé'),
+ (r'dio[r*]|迪奥','Dior'),
+ (r'burberry|博柏利','Burberry'),
+ (r'ferragamo|菲拉格慕','Ferragamo'),
+ (r'balenciag','Balenciaga'),
+ (r'acne','Acne Studios'),
+ (r'max\s*mara','Max Mara'),
+ (r'\brv\b|roger\s*vivier','Roger Vivier'),
+ (r'\bbv\b|bottega','Bottega Veneta'),
+ (r'\bm\s*m\s*6|margiela|马吉拉','Maison Margiela'),
+ (r'canada\s*goose','Canada Goose'),
+ (r'moncler','Moncler'),
+ (r'stone\s*island','Stone Island'),
+ (r'fendi','Fendi'),
+ (r'gianvito','Gianvito Rossi'),
+ (r'versac','Versace'),
+ (r'hublot','Hublot'),
+ (r'dolce','Dolce & Gabbana'),
+ (r'swarovski','Swarovski'),
+ (r'\bfred\b','Fred'),
+ (r'celin|赛琳','Celine'),
+ (r'prad','Prada'),
+ (r'\bgg\b','Gucci'),
+]
+COMP=[(re.compile(p),b) for p,b in RULES]
+def brand(title):
+    t=unicodedata.normalize('NFKC',title or '').lower()
+    t=re.sub(r'[ -​ ]',' ',t)
+    for rx,b in COMP:
+        if rx.search(t): return b
+    return ''

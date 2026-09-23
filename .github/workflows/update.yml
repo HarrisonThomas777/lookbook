@@ -1,0 +1,38 @@
+name: Update catalogue
+on:
+  schedule:
+    - cron: '0 5 * * *'   # every day at 05:00 UTC (06:00 UK summer time)
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: update
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Scrape the store
+        run: cd tools && python3 scrape.py
+      - name: Build catalogue data
+        run: cd tools && python3 build.py items.jsonl codes.json plain-data
+      - name: Encrypt with the access code
+        env: { ACCESS_CODE: "${{ secrets.ACCESS_CODE }}" }
+        run: |
+          rm -rf site/data && mkdir -p site
+          node tools/protect.mjs "$ACCESS_CODE" tools/plain-data site/data
+      - name: Deploy to Netlify
+        env:
+          NETLIFY_AUTH_TOKEN: "${{ secrets.NETLIFY_AUTH_TOKEN }}"
+          NETLIFY_SITE_ID: "${{ secrets.NETLIFY_SITE_ID }}"
+        run: npx --yes netlify-cli@latest deploy --prod --dir site --message "Automatic update $(date -u +%F)"
+      - name: Save product codes
+        run: |
+          git config user.name "catalogue-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add tools/codes.json
+          git diff --cached --quiet || git commit -m "Update product codes $(date -u +%F)"
+          git push
